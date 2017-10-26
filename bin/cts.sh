@@ -5,7 +5,6 @@
 source ../etc/cts.conf
 source ../etc/pub.sh
 
-export SHELL=bash
 export PIDFILE=${CTSBIN}/.cts.pid
 export CTSLOGNAME=${CTSLOG}/cts.log
 export CFGUPDSVR=${CTSBIN}/insCronTaskDb.sh
@@ -25,13 +24,12 @@ function showUsage
    echo -e "\t====================================="
    echo -e "\t| Cron Task Scanning Toolkit V1.0   |"
    echo -e "\t=====================================\n"
-   echo    " Usage: $0 b|s|l"
-   echo    "        *b-> boot"
-   echo    "        *s-> shutdown"
-   echo    "        *l-> list pid"
-   echo    "        *h-> show usage"
-   echo    " 注: 请使用该脚本启动所有服务，请勿单独启动脚本"
-   echo    ""
+   echo    "\tUsage: $0 b|s|l|h"
+   echo    "           *b-> boot"
+   echo    "           *s-> shutdown"
+   echo    "           *l-> list pid"
+   echo    "           *h-> show usage"
+   echo -e " 注: 请使用该脚本启动所有服务，请勿单独启动脚本\n"
 }
 
 
@@ -56,12 +54,12 @@ function _chkService
   then
      #检查进程是否存在
      PID=`cat $PIDFILE | grep $CFGUPDNAME | awk '{print $2}' | tr -d '\n' `
-     if [ "X${PID}" != "X"  -a  "X"$(pgrep -f $CFGUPDSVR | tr -d '\n') == "X${PID}"  ] 
+     if [ "X"$(pgrep -f $CFGUPDSVR | tr -d '\n') == "X${PID}"  ] 
      then
         return 1
      fi
      PID=`cat $PIDFILE | grep $LOGMERGNAME | awk '{print $2}' | tr -d '\n'`
-     if [ "X${PID}" != "X"  -a  "X"$(pgrep -f $LOGMERGNAME | tr -d '\n') == "X${PID}"  ] 
+     if [ "X"$(pgrep -f $LOGMERGNAME | tr -d '\n') == "X${PID}"  ] 
      then
         return 1
      fi
@@ -95,9 +93,9 @@ function _startSvr
      then
         local ServicePid=`pgrep -f $ServiceName`
         echo "$ServiceNameNoSuffix $ServicePid" >> $PIDFILE
-        echo -e ">>>> ${ServiceNameNoSuffix} are running [timestampe: $(getTimestamp)] [pid: $ServicePid]" >> $CTSLOGNAME
+        echo -e ">>>>>>>> ${ServiceNameNoSuffix} are running [timestamp: $(getTimestamp)] [pid: $ServicePid] >>>>>>>>" >> $CTSLOGNAME
      else 
-        echo "==== Toolkit Service [$ServiceName] 启动失败! ===="
+        echo "xxxx Toolkit Service [$ServiceNameNoSuffix] 启动失败! xxxx"
         exit 1
      fi
      echo "==== Toolkit Service [$ServiceNameNoSuffix] 启动成功[pid=$ServicePid]! ===="
@@ -106,13 +104,14 @@ function _startSvr
 function boot
 {
   _chkService
-  if [ $?  -eq 0 ]
+  if [ $? -eq 0 ]
   then
-     echo "==== Cron Task Scaning Toolkit 正在启动! ===="
+     echo "==== Cron Task Scaning Toolkits 正在启动! ===="
      > $PIDFILE
      _startSvr $CFGUPDSVR $CFGUPDNAME
+     sleep 5
      _startSvr $LOGMERGSVR $LOGMERGNAME
-     echo "==== Cron Task Scaning Toolkit 启动完成! ===="
+     echo "==== Cron Task Scaning Toolkits 启动完成! ===="
   else
      echo "==== Cron Task Scanning Toolkit 已启动! ===="
      exit 1
@@ -138,32 +137,33 @@ function shutdown
     _chkService
     if [ $? -eq 1 ]
     then
-       echo -e "Cron Task Scanning Toolkit 正在关闭\n日期: $(getTimestamp)"
+       echo -e "==== Cron Task Scanning Toolkit 正在关闭\n日期: $(getTimestamp) ===="
        _shutdown $LOGMERGSVR
        _shutdown $CFGUPDSVR
-       echo -e "<<<<CTS stoped [timestamp: $(getTimestamp)] [PID: $PID]\n\n" >> $CTSLOGNAME
+       echo -e ">>>>>>>> CTS stoped [timestamp: $(getTimestamp)] [PID: $PID] >>>>>>>>\n\n" >> $CTSLOGNAME
        [[ -f $PIDFILE ]] && unlink $PIDFILE
-       echo -e "Cron Task Scanning Toolkit 已关闭\n"
+       echo -e "==== Cron Task Scanning Toolkit 已关闭 ====\n"
     else
-       echo -e "==== Cron Task Scanning Toolkit 未启动 ===="
+       echo -e "xxxx Cron Task Scanning Toolkit 未启动 xxxx"
        exit 1
     fi
 }
 
-#启停加锁
-lockOper
-
-if [ $? -ne 0 ]
-then
-   echo "正在操作中，请稍后!"
-   exit 1
-fi
 
 if [ $# -ne 1 ]
 then
    showUsage
    exit 1
 else
+   #启停加锁
+   lockOper
+
+   if [ $? -ne 0 ]
+   then
+      echo "xxxx- 正在操作中，请稍后! -xxxx"
+      exit 1
+   fi
+
    case $1 in
      "b")
        boot
@@ -178,10 +178,11 @@ else
        showUsage
      ;;
      *)
-      echo "无效的参数"
+      echo "xxxx- 无效的参数 -xxxx"
+      showUsage
       exit 1
      ;;
    esac
 fi
 
-exit
+exit 0

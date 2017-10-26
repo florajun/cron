@@ -25,8 +25,8 @@ CurrDate=`getDate`
 TaskLogName="${CTSLOG}/${CurrDate}/.tmplog_${TaskId}_$$.log"
 ConcurrencyOffLock=${CTSHOME}/lock/$TaskId.lock
 
-#exec 1>> $TaskLogName
-#exec 2>> $TaskLogName
+exec 1>> $TaskLogName
+exec 2>> $TaskLogName
 
 function getConfByKey
 {
@@ -36,20 +36,17 @@ function getConfByKey
    awk -F'=' -v Key=${Key} '$1 == Key {print $2}' 
 }
 
-#判断配置文件是否存在
-#[[ -f $ConfPath ]] || logExit "${ConfPath}不存在"
-
-#获取TaskId对应的配置
-#TaskConf=`sed -n "/${TaskId}/p" $ConfPath`
 #获取并发标识
 TaskConcurrency=`getConfByKey $CallPara "TaskConcurrency"`
-echo $TaskConcurrency
+echo "并发标志:[$TaskConcurrency]"
+
 #获取Cmd
 Cmd=`getConfByKey $CallPara "CMD"`
-echo $Cmd
+echo "命令:[$Cmd]"
+
 #获取CmdPara
 CmdPara=`getConfByKey $CallPara "CMDPara"`
-echo $CmdPara
+echo "命令参数:[$CmdPara]"
 
 if [ "${TaskConcurrency}" == "OFF" ]
 then
@@ -57,8 +54,6 @@ then
    [[ -f $ConcurrencyOffLock ]] && logExit "任务${TaskId}不允许并发,当前已有该任务的实例运行，$$进程退出!"
    touch $ConcurrencyOffLock
 fi
-
-#允许并发不做任何处理
 
 #执行任务
 [[ ! -z $Cmd ]] && $Cmd $CmdPara

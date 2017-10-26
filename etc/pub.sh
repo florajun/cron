@@ -8,6 +8,7 @@ export LOCKFILE=${CTSBIN}/.cts.lock
 export PIDFILE=${CTSHOME}/bin/.cts.pid
 export InsTaskSvrScanIdel=10
 export LogMergeScanIdel=10
+export SHELL=`which bash`
 export LOCKFD=6
 
 function logExit

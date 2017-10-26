@@ -8,7 +8,6 @@ BEGIN{
      TaskId = ""
 
      #清空文件
-     #printf "" > TmpTaskTemplPath
      printf "" > CronTasksFile
 } 
 
@@ -25,7 +24,6 @@ BEGIN{
      {
         TaskStr[preTaskId] = TaskTemplStr
      }
-     #TaskTemplStr=TaskId
  }
 
  #任务id匹配上后处理配置字段
@@ -36,6 +34,10 @@ BEGIN{
      if ($1 == "Switch")
      {
         Switch[TaskId] = $2
+     }
+     else if ($1 == "CronComment")
+     {
+       CronComment[taskid] = $2
      }
      else if ($1 == "CronExpr")
      {
@@ -56,14 +58,12 @@ END{
        #设置了switch为ON 任务才有效
        if (Switch[taskid] == "ON")
        {
-         #不为空写任务模板文件
-         #if (TaskStr[taskid] != "")
-         #{
-         #   print TaskStr[taskid] >> TmpTaskTemplPath
-         #}
-         #不为空写Cron文件
          if (CronExpr[taskid] != "" && TaskStr[taskid] != "")
          {
+            if (CronComment[taskid] != "")
+            {
+               print "#--#"CronComment[taskid] >> CronTasksFile
+            }
             print CronExpr[taskid]"\t"WrapScript"\t"taskid"\t\""TaskStr[taskid]"\"" >> CronTasksFile
          }
 	     if (TaskArr[taskid] > 1)

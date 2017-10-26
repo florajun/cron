@@ -25,7 +25,7 @@ do
    DealNum=0
    for log in $(ls -1 ${TaskLogPath}/.tmplog_*.log 2>/dev/null)
    do
-   echo $log
+       echo $log
        logname=`basename $log`
        #Ωÿ»°taskid
        TaskId=$(echo $logname | sed -n 's/\.tmplog_\(.*\)\_.*.log/\1/p')
