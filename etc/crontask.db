@@ -1,0 +1,1 @@
+*/1 * * * *	/home/test/cron/bin/CallTask.sh	GD_TASK	"TaskConcurrency=0~|ClusterConcurrency=0~|ClusterSync=0~|CMDPara=test|test|0~|CMD=${HOME}/bin/sim_task~|TaskType=0~|TaskName=广电自动签到~|"
